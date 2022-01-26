@@ -59,7 +59,8 @@ export const Wrapper = styled.div`
         height:40px;
         margin:20px 0;
         padding:0 40px;
-        color: #87f1ff;
+        color:#FF5E31;
+        font-size:20px
     }
 
     .start {
