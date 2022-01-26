@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import {GlobalStyle, Wrapper} from './App.styles';
 /**Components */
 import QuestionCard from './components/QuestionCard';
+import { Loader } from './components/Loader';
 /**API */
 import { fetchQuizQuestions } from './API/Api';
 /**Type */
@@ -86,7 +87,7 @@ const App: React.FC =()=> {
                 </button>): null}
                 {/* show score when not in a game over mode */}
         {!gameOver ? <p className="score">Score: {score} / {TOTAL_QUESTIONS}</p> : null}
-                {loading && <p>Loading Questions...</p> }   
+        {loading && <p><Loader/></p> }   
                 {!loading && !gameOver && (
                   <QuestionCard
                   questionNum={number + 1}
