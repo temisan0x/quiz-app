@@ -85,7 +85,7 @@ const App: React.FC =()=> {
                   Start
                 </button>): null}
                 {/* show score when not in a game over mode */}
-              {!gameOver ? <p className="score">Score:{ score}</p> : null}
+        {!gameOver ? <p className="score">Score: {score} / {TOTAL_QUESTIONS}</p> : null}
                 {loading && <p>Loading Questions...</p> }   
                 {!loading && !gameOver && (
                   <QuestionCard
