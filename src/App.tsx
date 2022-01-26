@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
-import './App.css';
+import React, { useState } from 'react';
+/**styles */
+import {GlobalStyle, Wrapper} from './App.styles';
 /**Components */
 import QuestionCard from './components/QuestionCard';
 /**API */
@@ -7,7 +8,7 @@ import { fetchQuizQuestions } from './API/Api';
 /**Type */
 import {QuestionState, Difficulty} from './API/Api';
 
-type AnswerObject = {
+export  type AnswerObject = {
   question:string;
   answer: string;
   correct: boolean;
@@ -65,38 +66,47 @@ const App: React.FC =()=> {
   };
 
   const nextQuestion = () => {
-
+    //move on the nextQuestion if not the last question
+    const nextQuestion = number + 1;
+    if(nextQuestion === TOTAL_QUESTIONS){
+      setGameOver(true);
+    } else {
+      setNumber(nextQuestion)
+    }
   }
 
   return (
-    <div className="App">
-      <h1>React Quiz</h1>
-      {gameOver || userAnswers.length === TOTAL_QUESTIONS ? (
-        <button className="start" onClick={startTrivia}>
-          Start
-        </button>): null}
-        {/* show score when not in a game over mode */}
-        {!gameOver ? <p className="score">Score:</p> : null}
-        {loading && <p>Loading Questions...</p> }
-        {!loading && !gameOver && (
-          <QuestionCard
-          questionNum={number + 1}
-          totalQuestions={TOTAL_QUESTIONS}
-          question={questions[number].question}
-          answers={questions[number].answers}
-          userAnswer={userAnswers ? userAnswers[number] : undefined}
-          callback={checkAnswer}
-        />
-        )}
-        {!gameOver && 
-        !loading && 
-        userAnswers.length === number + 1 
-        && number !== TOTAL_QUESTIONS - 1 ? (
-            <button>
-              Next Question
-            </button>
-        ) : null}      
-    </div>
+    <>
+      <GlobalStyle/>
+        <Wrapper>
+              <h1>React Quiz</h1>
+              {gameOver || userAnswers.length === TOTAL_QUESTIONS ? (
+                <button className="start" onClick={startTrivia}>
+                  Start
+                </button>): null}
+                {/* show score when not in a game over mode */}
+              {!gameOver ? <p className="score">Score:{ score}</p> : null}
+                {loading && <p>Loading Questions...</p> }   
+                {!loading && !gameOver && (
+                  <QuestionCard
+                  questionNum={number + 1}
+                  totalQuestions={TOTAL_QUESTIONS}
+                  question={questions[number].question}
+                  answers={questions[number].answers}
+                  userAnswer={userAnswers ? userAnswers[number] : undefined}
+                  callback={checkAnswer}
+                /> 
+                )}
+                {!gameOver && 
+                !loading && 
+                userAnswers.length === number + 1 
+                && number !== TOTAL_QUESTIONS - 1 ? (
+                    <button className="next">
+                      Next Question
+                    </button>
+                ) : null}  
+        </Wrapper>
+    </>
   );
 }
 
