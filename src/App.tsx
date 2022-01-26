@@ -101,7 +101,7 @@ const App: React.FC =()=> {
                 !loading && 
                 userAnswers.length === number + 1 
                 && number !== TOTAL_QUESTIONS - 1 ? (
-                    <button className="next">
+                    <button className="next" onClick={nextQuestion}>
                       Next Question
                     </button>
                 ) : null}  
