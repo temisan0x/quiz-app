@@ -60,7 +60,7 @@ export const Wrapper = styled.div`
         margin:20px 0;
         padding:0 40px;
         color:#FF5E31;
-        font-size:20px
+        font-size:20px;
     }
 
     .start {
