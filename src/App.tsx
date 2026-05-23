@@ -1,114 +1,133 @@
-import React, { useState } from 'react';
-/**styles */
-import {GlobalStyle, Wrapper} from './App.styles';
-/**Components */
-import QuestionCard from './components/QuestionCard';
-import { Loader } from './components/Loader';
-/**API */
-import { fetchQuizQuestions } from './API/Api';
-/**Type */
-import {QuestionState, Difficulty} from './API/Api';
+import React, { useState } from "react";
+import { GlobalStyle, Wrapper } from "./App.styles";
+import QuestionCard from "./components/QuestionCard";
+import { Loader } from "./components/Loader";
+import { QuestionState, Difficulty, fetchQuizQuestions } from "./api/quiz";
 
-export  type AnswerObject = {
-  question:string;
+export type AnswerObject = {
+  question: string;
   answer: string;
   correct: boolean;
   correctAnswer: string;
-}
+};
 
 const TOTAL_QUESTIONS = 10;
 
-const App: React.FC =()=> {
-
+const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<QuestionState[]>([]);
+  const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.Easy);
   const [number, setNumber] = useState(0);
   const [userAnswers, setUserAnswers] = useState<AnswerObject[]>([]);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(true);
-
-  console.log(fetchQuizQuestions(TOTAL_QUESTIONS, Difficulty.Easy));
-  
+  const [error, setError] = useState<string | null>(null);
+  const [gameFinished, setGameFinished] = useState(false);
 
   const startTrivia = async () => {
     setLoading(true);
     setGameOver(false);
+    setError(null);
 
-
-    const newQuestions = await fetchQuizQuestions(
-      TOTAL_QUESTIONS,
-      Difficulty.Easy
+    try {
+      const newQuestions = await fetchQuizQuestions(
+        TOTAL_QUESTIONS,
+        difficulty,
       );
-
       setQuestions(newQuestions);
       setScore(0);
       setUserAnswers([]);
       setNumber(0);
+      setGameFinished(false);
+    } catch (err) {
+      setError("Failed to load questions. Please try again.");
+      setGameOver(true);
+    } finally {
       setLoading(false);
-      };
+    }
+  };
 
-  const checkAnswer = (e : React.MouseEvent<HTMLButtonElement>)=> {
+  const checkAnswer = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!gameOver) {
-      //user answers
       const answer = e.currentTarget.value;
-      //check answer against correct answer
       const correct = questions[number].correct_answer === answer;
-      //add score if answer is correct
-      if(correct) setScore((prev) => prev + 1);
-      //save answer in the array for user answers later
+      if (correct) setScore((prev) => prev + 1);
       const answerObject = {
         question: questions[number].question,
         answer,
         correct,
-        correctAnswer:questions[number].correct_answer,
+        correctAnswer: questions[number].correct_answer,
       };
       setUserAnswers((prev) => [...prev, answerObject]);
     }
   };
 
   const nextQuestion = () => {
-    //move on the nextQuestion if not the last question
     const nextQuestion = number + 1;
-    if(nextQuestion === TOTAL_QUESTIONS){
+    if (nextQuestion === TOTAL_QUESTIONS) {
       setGameOver(true);
+      setGameFinished(true);
     } else {
-      setNumber(nextQuestion)
+      setNumber(nextQuestion);
     }
-  }
+  };
 
   return (
     <>
-      <GlobalStyle/>
-        <Wrapper>
-              <h1>React Quiz</h1>
-              {gameOver || userAnswers.length === TOTAL_QUESTIONS ? (
-                <button className="start" onClick={startTrivia}>
-                  Start
-                </button>): null}
-                {/* show score when not in a game over mode */}
-        {!gameOver ? <p className="score">Score: {score} / {TOTAL_QUESTIONS}</p> : null}
-        {loading && <p><Loader/></p> }   
-                {!loading && !gameOver && (
-                  <QuestionCard
-                  questionNum={number + 1}
-                  totalQuestions={TOTAL_QUESTIONS}
-                  question={questions[number].question}
-                  answers={questions[number].answers}
-                  userAnswer={userAnswers ? userAnswers[number] : undefined}
-                  callback={checkAnswer}
-                /> 
-                )}
-                {!gameOver && 
-                !loading && 
-                userAnswers.length === number + 1 
-                && number !== TOTAL_QUESTIONS - 1 ? (
-                    <button className="next" onClick={nextQuestion}>
-                      Next Question
-                    </button>
-                ) : null}  
-        </Wrapper>
+      <GlobalStyle />
+      <Wrapper>
+        <h1>React Quiz</h1>
+        {gameOver && (
+          <select
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value as Difficulty)}
+          >
+            <option value={Difficulty.Easy}>Easy</option>
+            <option value={Difficulty.Medium}>Medium</option>
+            <option value={Difficulty.Hard}>Hard</option>
+          </select>
+        )}
+        {gameOver || userAnswers.length === TOTAL_QUESTIONS ? (
+          <button className="start" onClick={startTrivia} disabled={loading}>
+            Start
+          </button>
+        ) : null}
+        {loading && <Loader />}
+        {error && <p className="error">{error}</p>}
+        {!loading && !gameOver && (
+          <QuestionCard
+            questionNum={number + 1}
+            totalQuestions={TOTAL_QUESTIONS}
+            question={questions[number].question}
+            answers={questions[number].answers}
+            userAnswer={userAnswers[number]}
+            callback={checkAnswer}
+          />
+        )}
+        {!gameOver && !loading && userAnswers.length === number + 1 ? (
+          <button className="next" onClick={nextQuestion}>
+            {number === TOTAL_QUESTIONS - 1 ? "Finish Quiz" : "Next Question"}
+          </button>
+        ) : null}
+
+        {gameFinished && (
+          <div className="results">
+            <h2>Game Over!</h2>
+            <p>
+              You scored {score} out of {TOTAL_QUESTIONS}
+            </p>
+            <p>
+              {score >= 7
+                ? "🔥 Great job!"
+                : score >= 4
+                  ? "👍 Not bad!"
+                  : "📚 Keep practicing!"}
+            </p>
+          </div>
+        )}
+      </Wrapper>
     </>
   );
-}
+};
 
 export default App;
