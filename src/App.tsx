@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { FaFire, FaThumbsUp, FaBook, FaPlay } from "react-icons/fa";
 import { GlobalStyle, Wrapper } from "./App.styles";
 import QuestionCard from "./components/QuestionCard";
@@ -14,7 +14,6 @@ export type AnswerObject = {
 
 const TOTAL_QUESTIONS = 10;
 
-
 const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<QuestionState[]>([]);
@@ -26,7 +25,22 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [gameFinished, setGameFinished] = useState(false);
 
+  const clickSoundRef = useRef<HTMLAudioElement | null>(null);
+  const hoverSoundRef = useRef<HTMLAudioElement | null>(null);
+
+  const playClick = () => {
+    clickSoundRef.current?.play().catch(() => {});
+  };
+
+  const playHover = () => {
+    if (hoverSoundRef.current) {
+      hoverSoundRef.current.currentTime = 0;
+      hoverSoundRef.current.play().catch(() => {});
+    }
+  };
+
   const startTrivia = async () => {
+    playClick();
     setLoading(true);
     setGameOver(false);
     setError(null);
@@ -36,6 +50,7 @@ const App: React.FC = () => {
         TOTAL_QUESTIONS,
         difficulty,
       );
+
       setQuestions(newQuestions);
       setScore(0);
       setUserAnswers([]);
@@ -51,26 +66,34 @@ const App: React.FC = () => {
 
   const checkAnswer = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!gameOver) {
+      playClick();
+
       const answer = e.currentTarget.value;
       const correct = questions[number].correct_answer === answer;
+
       if (correct) setScore((prev) => prev + 1);
+
       const answerObject = {
         question: questions[number].question,
         answer,
         correct,
         correctAnswer: questions[number].correct_answer,
       };
+
       setUserAnswers((prev) => [...prev, answerObject]);
     }
   };
 
   const nextQuestion = () => {
-    const nextQuestion = number + 1;
-    if (nextQuestion === TOTAL_QUESTIONS) {
+    playClick();
+
+    const nextQuestionIndex = number + 1;
+
+    if (nextQuestionIndex === TOTAL_QUESTIONS) {
       setGameOver(true);
       setGameFinished(true);
     } else {
-      setNumber(nextQuestion);
+      setNumber(nextQuestionIndex);
     }
   };
 
@@ -79,6 +102,7 @@ const App: React.FC = () => {
       <GlobalStyle />
       <Wrapper>
         <h1>Quizzy</h1>
+
         {gameOver && (
           <select
             value={difficulty}
@@ -89,14 +113,23 @@ const App: React.FC = () => {
             <option value={Difficulty.Hard}>Hard</option>
           </select>
         )}
+
         {gameOver || userAnswers.length === TOTAL_QUESTIONS ? (
-          <button className="start" onClick={startTrivia} disabled={loading}>
+          <button
+            className="start"
+            onClick={startTrivia}
+            disabled={loading}
+            onMouseEnter={playHover}
+          >
             <FaPlay style={{ marginRight: "8px", fontSize: "0.8rem" }} />
             Start
           </button>
         ) : null}
+
         {loading && <Loader />}
+
         {error && <p className="error">{error}</p>}
+
         {!loading && !gameOver && (
           <QuestionCard
             questionNum={number + 1}
@@ -107,6 +140,7 @@ const App: React.FC = () => {
             callback={checkAnswer}
           />
         )}
+
         {!gameOver && !loading && userAnswers.length === number + 1 ? (
           <button className="next" onClick={nextQuestion}>
             {number === TOTAL_QUESTIONS - 1 ? "Finish Quiz" : "Next Question"}
@@ -119,6 +153,7 @@ const App: React.FC = () => {
             <p>
               You scored {score} out of {TOTAL_QUESTIONS}
             </p>
+
             <p>
               {score >= 7 ? (
                 <>
@@ -136,6 +171,9 @@ const App: React.FC = () => {
             </p>
           </div>
         )}
+
+        <audio ref={clickSoundRef} src="/sound/clickSound.mp3" preload="auto" />
+        <audio ref={hoverSoundRef} src="/sound/mouseclick.wav" preload="auto" />
       </Wrapper>
     </>
   );
