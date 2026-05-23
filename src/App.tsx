@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaFire, FaThumbsUp, FaBook, FaPlay } from "react-icons/fa";
 import { GlobalStyle, Wrapper } from "./App.styles";
 import QuestionCard from "./components/QuestionCard";
 import { Loader } from "./components/Loader";
@@ -12,6 +13,7 @@ export type AnswerObject = {
 };
 
 const TOTAL_QUESTIONS = 10;
+
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -89,6 +91,7 @@ const App: React.FC = () => {
         )}
         {gameOver || userAnswers.length === TOTAL_QUESTIONS ? (
           <button className="start" onClick={startTrivia} disabled={loading}>
+            <FaPlay style={{ marginRight: "8px", fontSize: "0.8rem" }} />
             Start
           </button>
         ) : null}
@@ -117,11 +120,19 @@ const App: React.FC = () => {
               You scored {score} out of {TOTAL_QUESTIONS}
             </p>
             <p>
-              {score >= 7
-                ? "🔥 Great job!"
-                : score >= 4
-                  ? "👍 Not bad!"
-                  : "📚 Keep practicing!"}
+              {score >= 7 ? (
+                <>
+                  <FaFire color="#ff5e31" /> Great job!
+                </>
+              ) : score >= 4 ? (
+                <>
+                  <FaThumbsUp color="#56ffa4" /> Not bad!
+                </>
+              ) : (
+                <>
+                  <FaBook color="#87f1ff" /> Keep practicing!
+                </>
+              )}
             </p>
           </div>
         )}
