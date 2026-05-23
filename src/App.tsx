@@ -78,7 +78,7 @@ const App: React.FC = () => {
     <>
       <GlobalStyle />
       <Wrapper>
-        <h1>React Quiz</h1>
+        <h1>Quizzy</h1>
         {gameOver && (
           <select
             value={difficulty}
